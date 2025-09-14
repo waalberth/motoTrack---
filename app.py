@@ -1,20 +1,51 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+import sqlite3
 
 # Inicializa a aplicação Flask
 app = Flask(__name__)
 # Habilita o CORS para toda a aplicação.
 CORS(app)
 
-# Banco de dados de usuários fictício para simular a autenticação.
+# Define o nome do arquivo do banco de dados
+DATABASE = 'mototrack.db'
+
+# Banco de dados de usuários fictício (manteremos isso por enquanto)
 USERS = {
     "teste@mototrack.com": "123456",
     "usuario@mototrack.com": "senha123"
 }
 
-# Lista temporária para armazenar os abastecimentos.
-# Em um projeto real, isso seria um banco de dados de verdade.
-ABASTECIMENTOS = []
+def get_db_connection():
+    """
+    Função para estabelecer a conexão com o banco de dados.
+    """
+    conn = sqlite3.connect(DATABASE)
+    conn.row_factory = sqlite3.Row  # Permite acessar colunas por nome
+    return conn
+
+def init_db():
+    """
+    Função para inicializar o banco de dados, criando a tabela se ela não existir.
+    """
+    conn = get_db_connection()
+    # Usa um bloco with para garantir que a conexão será fechada automaticamente
+    with conn:
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS abastecimentos (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                data TEXT NOT NULL,
+                quilometragem REAL NOT NULL,
+                litros REAL NOT NULL,
+                preco REAL NOT NULL,
+                combustivel TEXT NOT NULL,
+                valor_total REAL NOT NULL
+            );
+        """)
+    conn.close()
+
+# Chama a função para inicializar o banco de dados antes de iniciar o servidor
+init_db()
 
 @app.route("/login", methods=["POST"])
 def login():
@@ -38,13 +69,11 @@ def login():
 @app.route("/abastecimentos/cadastrar", methods=["POST"])
 def cadastrar_abastecimento():
     """
-    Nova rota para cadastrar um abastecimento.
-    Recebe os dados do formulário e os adiciona à nossa lista temporária.
+    Rota para cadastrar um abastecimento no banco de dados.
     """
     if not request.is_json:
         return jsonify({"success": False, "message": "Requisição inválida."}), 400
     
-    # Extrai os dados do corpo da requisição JSON
     data_abastecimento = request.json.get("data")
     quilometragem = request.json.get("quilometragem")
     litros = request.json.get("litros")
@@ -52,30 +81,25 @@ def cadastrar_abastecimento():
     combustivel = request.json.get("combustivel")
     valor_total = litros * preco
 
-    # Validação simples dos dados recebidos
     if not all([data_abastecimento, quilometragem, litros, preco, combustivel]):
         return jsonify({"success": False, "message": "Todos os campos são obrigatórios."}), 400
         
-    # Cria um dicionário com os dados do abastecimento
-    abastecimento = {
-        "id": len(ABASTECIMENTOS) + 1,
-        "data": data_abastecimento,
-        "quilometragem": quilometragem,
-        "litros": litros,
-        "preco": preco,
-        "combustivel": combustivel,
-        "valor_total": valor_total
-    }
-    
-    # Adiciona o abastecimento à lista temporária
-    ABASTECIMENTOS.append(abastecimento)
-    
-    print(f"Novo abastecimento cadastrado: {abastecimento}")
-    print(f"Total de abastecimentos: {len(ABASTECIMENTOS)}")
-    
-    return jsonify({"success": True, "message": "Abastecimento cadastrado com sucesso!"}), 200
+    try:
+        conn = get_db_connection()
+        with conn:
+            conn.execute("""
+                INSERT INTO abastecimentos (data, quilometragem, litros, preco, combustivel, valor_total)
+                VALUES (?, ?, ?, ?, ?, ?);
+            """, (data_abastecimento, quilometragem, litros, preco, combustivel, valor_total))
+        conn.close()
+        
+        print("Abastecimento cadastrado com sucesso no banco de dados.")
+        
+        return jsonify({"success": True, "message": "Abastecimento cadastrado com sucesso!"}), 200
+    except Exception as e:
+        print(f"Erro ao cadastrar abastecimento: {e}")
+        return jsonify({"success": False, "message": "Erro ao tentar cadastrar no banco de dados."}), 500
 
 
 if __name__ == "__main__":
-    # Inicia o servidor Flask em modo de desenvolvimento na porta 5001
     app.run(debug=True, port=5001)
