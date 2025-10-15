@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MotoTrack - Cadastro de Abastecimento</title>
-    <!-- Inclui o Tailwind CSS para estilização -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
@@ -56,6 +55,13 @@
                 Cadastrar
             </button>
             
+            <div class="flex justify-center mt-4">
+                <a href="abastecimentos.html" 
+                   class="inline-block py-2 px-4 rounded-lg font-semibold text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition duration-150 ease-in-out">
+                    Ver Abastecimentos Registrados
+                </a>
+            </div>
+            
             <div id="statusMessage" class="text-center mt-4 text-sm font-medium" style="display: none;"></div>
         </form>
     </div>
@@ -81,7 +87,6 @@
             statusMessage.style.display = 'none';
 
             try {
-                // AQUI está a mudança para conectar com o back-end
                 const response = await fetch('http://localhost:5001/abastecimentos/cadastrar', {
                     method: 'POST',
                     headers: {
@@ -93,7 +98,7 @@
                         litros: litros,
                         preco: preco,
                         combustivel: combustivel,
-                        valor_total: valorTotal // Enviando o valor total para o backend
+                        valor_total: valorTotal 
                     }),
                 });
 
@@ -103,7 +108,7 @@
                     statusMessage.textContent = result.message;
                     statusMessage.classList.add('text-green-600');
                     statusMessage.style.display = 'block';
-                    form.reset(); // Limpa o formulário após o sucesso
+                    form.reset(); 
                 } else {
                     statusMessage.textContent = result.message;
                     statusMessage.classList.add('text-red-600');

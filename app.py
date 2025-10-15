@@ -100,6 +100,25 @@ def cadastrar_abastecimento():
         print(f"Erro ao cadastrar abastecimento: {e}")
         return jsonify({"success": False, "message": "Erro ao tentar cadastrar no banco de dados."}), 500
 
+# Esta é a posição correta para a nova rota de listagem
+@app.route("/abastecimentos/listar", methods=["GET"])
+def listar_abastecimentos():
+    """
+    Rota para listar todos os abastecimentos do banco de dados.
+    """
+    abastecimentos = []
+    try:
+        conn = get_db_connection()
+        with conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM abastecimentos ORDER BY data DESC;")
+            abastecimentos = [dict(row) for row in cursor.fetchall()]
+        conn.close()
+        return jsonify(abastecimentos), 200
+    except Exception as e:
+        print(f"Erro ao listar abastecimentos: {e}")
+        return jsonify({"success": False, "message": "Erro ao tentar buscar abastecimentos no banco de dados."}), 500
+
 
 if __name__ == "__main__":
     app.run(debug=True, port=5001)
