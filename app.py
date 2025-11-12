@@ -10,7 +10,7 @@ CORS(app)
 # Define o nome do arquivo do banco de dados
 DATABASE = 'mototrack.db'
 
-# Banco de dados de usuários fictício (manteremos isso por enquanto)
+# Banco de dados de usuários locais
 USERS = {
     "teste@mototrack.com": "123456",
     "usuario@mototrack.com": "senha123"
@@ -29,7 +29,6 @@ def init_db():
     Função para inicializar o banco de dados, criando a tabela se ela não existir.
     """
     conn = get_db_connection()
-    # Usa um bloco with para garantir que a conexão será fechada automaticamente
     with conn:
         conn.execute("""
             CREATE TABLE IF NOT EXISTS abastecimentos (
@@ -44,7 +43,7 @@ def init_db():
         """)
     conn.close()
 
-# Chama a função para inicializar o banco de dados antes de iniciar o servidor
+# inicializando o banco de dados 
 init_db()
 
 @app.route("/login", methods=["POST"])
@@ -100,11 +99,10 @@ def cadastrar_abastecimento():
         print(f"Erro ao cadastrar abastecimento: {e}")
         return jsonify({"success": False, "message": "Erro ao tentar cadastrar no banco de dados."}), 500
 
-# Esta é a posição correta para a nova rota de listagem
 @app.route("/abastecimentos/listar", methods=["GET"])
 def listar_abastecimentos():
     """
-    Rota para listar todos os abastecimentos do banco de dados.
+    Nova rota para listar todos os abastecimentos do banco de dados.
     """
     abastecimentos = []
     try:
@@ -118,6 +116,27 @@ def listar_abastecimentos():
     except Exception as e:
         print(f"Erro ao listar abastecimentos: {e}")
         return jsonify({"success": False, "message": "Erro ao tentar buscar abastecimentos no banco de dados."}), 500
+
+from flask import request, jsonify 
+
+@app.route('/abastecimentos/excluir/<int:id>', methods=['DELETE'])
+def excluir_abastecimento(id):
+    try:
+        conn = sqlite3.connect('mototrack.db')
+        cursor = conn.cursor()
+
+        # Comando SQL para deletar o registro
+        cursor.execute("DELETE FROM abastecimentos WHERE id = ?", (id,))
+        
+        conn.commit()
+        conn.close()
+        
+        # msg sucesso
+        return jsonify({"message": f"Abastecimento ID {id} excluído com sucesso!"}), 200
+
+    except Exception as e:
+        # msg erro
+        return jsonify({"message": f"Erro ao excluir abastecimento: {str(e)}"}), 500
 
 
 if __name__ == "__main__":
