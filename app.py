@@ -154,20 +154,17 @@ def obter_abastecimento_por_id(id):
         if abastecimento is None:
             return jsonify({"success": False, "message": f"Abastecimento ID {id} não encontrado."}), 404
             
-        # Retorna o abastecimento como um dicionário JSON
+        # Retorna o abastecimento
         return jsonify(dict(abastecimento)), 200
         
     except Exception as e:
         print(f"Erro ao buscar abastecimento ID {id}: {e}")
         return jsonify({"success": False, "message": "Erro ao buscar detalhes do abastecimento."}), 500
 
-## ROTA PATCH PARA EDIÇÃO (Atualização Parcial)
+# Nova rota para editar abastecimento
+
 @app.route('/abastecimentos/editar/<int:id>', methods=['PATCH'])
 def editar_abastecimento(id):
-    """
-    Rota para atualização PARCIAL de um abastecimento existente pelo ID (PATCH).
-    Busca os dados antigos, mescla com os novos e recalcula o valor total.
-    """
     dados = request.get_json()
     
     if not dados:
@@ -178,7 +175,7 @@ def editar_abastecimento(id):
         with conn:
             cursor = conn.cursor()
             
-            # 1. Buscar o registro existente para ter os valores atuais
+            #Busca os valores atuais
             cursor.execute("SELECT * FROM abastecimentos WHERE id = ?", (id,))
             registro_antigo = cursor.fetchone()
             
@@ -186,15 +183,11 @@ def editar_abastecimento(id):
                 return jsonify({"success": False, "message": f"Abastecimento ID {id} não encontrado."}), 404
             
             registro_antigo = dict(registro_antigo)
-            
-            # 2. Prepara os novos dados, tratando a conversão para float
+           #tratamento de dados 
             litros = float(dados.get('litros', registro_antigo['litros']))
             preco = float(dados.get('preco', registro_antigo['preco']))
             
-            # 3. Recalcula o valor total
             valor_total = litros * preco
-            
-            # 4. Monta a lista de campos a serem atualizados
             campos_para_atualizar = []
             valores_para_atualizar = []
             
@@ -205,15 +198,15 @@ def editar_abastecimento(id):
                 'litros': litros,
                 'preco': preco,
                 'combustivel': dados.get('combustivel', registro_antigo['combustivel']),
-                'valor_total': valor_total # Valor recalculado
+                'valor_total': valor_total 
             }
 
-            # Itera sobre os campos para montar a query de UPDATE
+            # querie de atualizacao
             for chave, valor in campos_com_valores.items():
                 campos_para_atualizar.append(f"{chave} = ?")
                 valores_para_atualizar.append(valor)
             
-            # 5. Execução do UPDATE
+            #Executa o UPDATE
             query = f"UPDATE abastecimentos SET {', '.join(campos_para_atualizar)} WHERE id = ?"
             params = tuple(valores_para_atualizar) + (id,) 
             

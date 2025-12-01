@@ -4,13 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MotoTrack - Login</title>
-    <!-- Inclui o Tailwind CSS para estilização -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f1f5f9; /* bg-slate-100 */
+            background-color: #f1f5f9; 
         }
     </style>
 </head>
@@ -51,13 +50,11 @@
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
 
-            // Mostra o feedback de "carregando"
             loginButton.textContent = 'Carregando...';
             loginButton.disabled = true;
             statusMessage.style.display = 'none';
 
             try {
-                // AQUI está a mudança: o endereço agora aponta para a porta 5001
                 const response = await fetch('http://localhost:5001/login', {
                     method: 'POST',
                     headers: {
@@ -72,7 +69,6 @@
                     statusMessage.textContent = data.message;
                     statusMessage.classList.add('text-green-600');
                     statusMessage.style.display = 'block';
-                    // Redireciona para a página de cadastro após um login bem-sucedido
                     window.location.href = 'cadastro_abastecimento.html';
                 } else {
                     statusMessage.textContent = data.message;
