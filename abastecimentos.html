@@ -28,7 +28,60 @@
     <h1>Lista de Abastecimentos</h1>
     <div id="abastecimentos-container">
         </div>
+<style>
+        /* Estilos da Tabela (do bloco original) */
+        /* ... (Mantenha seus estilos existentes) ... */
+        .btn-editar {
+            background-color: #007bff; color: white; border: none; padding: 5px 10px; cursor: pointer; border-radius: 4px; font-size: 0.9em; margin-right: 5px;
+        }
+        .btn-editar:hover { background-color: #0056b3; }
 
+        /* Estilos para o Modal */
+        .modal-overlay {
+            display: none; /* Inicia escondido */
+            position: fixed; z-index: 10; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.4); 
+        }
+        .modal-content {
+            background-color: #fefefe; margin: 15% auto; padding: 20px; border: 1px solid #888; width: 80%; max-width: 500px; border-radius: 8px;
+        }
+        .modal-content input, .modal-content button, .modal-content select { margin-top: 10px; display: block; width: 100%; padding: 8px;}
+        .modal-content label { margin-top: 15px; display: block; font-weight: bold;}
+    </style>
+</head>
+<body>
+    
+    <div id="abastecimentos-container">
+        </div>
+
+    <div id="modal-edicao" class="modal-overlay">
+        <div class="modal-content">
+            <h2>Editar Abastecimento</h2>
+            
+            <form id="form-edicao">
+                <p>ID do Registro: <span id="display-id-edicao"></span></p>
+
+                <label for="input-data-edicao">Data:</label>
+                <input type="date" id="input-data-edicao" name="data" required><br>
+
+                <label for="input-quilometragem-edicao">Quilometragem (km):</label>
+                <input type="number" step="0.01" id="input-quilometragem-edicao" name="quilometragem" required><br>
+                
+                <label for="input-litros-edicao">Litros:</label>
+                <input type="number" step="0.01" id="input-litros-edicao" name="litros" required><br>
+
+                <label for="input-preco-edicao">Preço (R$/L):</label>
+                <input type="number" step="0.01" id="input-preco-edicao" name="preco" required><br>
+
+                <label for="input-combustivel-edicao">Combustível:</label>
+                <input type="text" id="input-combustivel-edicao" name="combustivel" required><br>
+                
+                <p>Valor Total Atual: <span id="display-valor-total-edicao"></span></p>
+
+                <button type="submit" class="btn-editar">Salvar Alterações 💾</button>
+                <button type="button" onclick="document.getElementById('modal-edicao').style.display = 'none'">Cancelar</button>
+            </form>
+        </div>
+    </div>
     <script src="script.js"></script>
 </body>
 </html>
